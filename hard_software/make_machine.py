@@ -48,17 +48,31 @@ def parse_gates(instructions):
                                        output=trim_op(next_ins.operands[0])))
                 elif next_ins.op == ins.op:
                     # parse chained gates
-                    print("Chained gate!")
-                    # Chained gates
                     gates = []
+
+                    gates.append(gate(op=ins.op,
+                                      input=[al_sig, trim_op(ins.operands[1])],
+                                      output=""))
+
                     chain_count = 1
                     while next_ins.op == ins.op:
+                    
+                        gates.append(gate(op=ins.op,
+                                      input=[trim_op(next_ins.operands[1])],
+                                      output=""))
 
                         chain_count += 1
                         next_ins = instructions[i + chain_count]
 
-                    # push back chained gates
-                    retval.append(chained_gates())
+                    if next_ins.op == "mov":
+                        # locate output
+                        output = trim_op(next_ins.operands[0])
+
+                        # push back chained gates
+                        retval.append(chained_gates(gates=gates, output=output))
+                    else:
+                        print(f"unexpected end of gate chain: {next_ins}")
+
                     i += chain_count
                     continue
                 else:
